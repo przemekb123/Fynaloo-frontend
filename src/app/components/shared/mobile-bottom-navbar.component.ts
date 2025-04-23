@@ -1,0 +1,138 @@
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { MobileAddFriendComponent } from '../mobile/friend/mobile-add-friend.component';
+import {MobileCreateGroupComponent} from '../mobile/group/mobile-create-group.component';
+import {MobileAddExpenseComponent} from '../mobile/mobile-add-expense.component';
+
+@Component({
+  standalone: true,
+  selector: 'app-bottom-navbar',
+  imports: [CommonModule, RouterLink, MobileAddFriendComponent, MobileCreateGroupComponent, MobileAddExpenseComponent],
+  template: `
+    <nav class="fixed bottom-0 left-0 right-0 bg-pink-300 h-16 flex items-center justify-around z-50 shadow-inner">
+
+      <!-- Nawigacja -->
+      <ng-container *ngFor="let item of navItems">
+        <a
+          [routerLink]="item.link"
+          class="relative flex flex-col items-center justify-center w-12 h-12"
+          [ngClass]="{'bg-pink-100 rounded-full': isActive(item.link)}"
+        >
+          <span class="material-icons text-2xl">
+            {{ item.icon }}
+          </span>
+        </a>
+      </ng-container>
+
+      <!-- Kółko tła -->
+      <div class="absolute -top-13 left-[calc(50%+5px)] transform -translate-x-1/2 w-22 h-22 bg-white rounded-full z-10"></div>
+
+      <!-- Przycisk "+" -->
+      <div class="absolute -top-9 left-[calc(50%+5px)] transform -translate-x-1/2 z-20">
+        <button (click)="openMenu()" class="w-16 h-16 rounded-full bg-gradient-to-r from-[#F50800] to-[#F200D1] flex items-center justify-center shadow-lg">
+          <span class="material-icons text-white text-4xl">add</span>
+        </button>
+      </div>
+
+      <!-- Popup menu -->
+      <div *ngIf="showMenu" class="fixed inset-0 bg-black bg-opacity-40 flex items-end z-50" (click)="closeMenu()">
+        <div class="bg-white w-full rounded-t-3xl p-6 pt-12 flex flex-col gap-4 relative" (click)="$event.stopPropagation()">
+
+          <button (click)="closeMenu()" class="absolute top-4 right-4">
+            <span class="material-icons text-gray-400 hover:text-gray-600 text-3xl">close</span>
+          </button>
+
+          <button (click)="navigateTo('/add-debt')" class="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-100 transition">
+            <span class="text-2xl">💳</span>
+            <span class="text-lg font-semibold text-gray-700">Dodaj dług</span>
+          </button>
+
+          <button (click)="toggleAddExpensePopup()" class="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-100 transition">
+            <span class="material-icons text-pink-500">add_shopping_cart</span>
+            <span class="text-lg font-semibold text-gray-700">Dodaj wydatek</span>
+          </button>
+
+          <button (click)="navigateTo('/add-settlement')" class="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-100 transition">
+            <span class="material-icons text-2xl text-pink-500">sync_alt</span>
+            <span class="text-lg font-semibold text-gray-700">Dodaj wyrównanie</span>
+          </button>
+
+          <button (click)="toggleGroupPopup()" class="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-100 transition">
+            <span class="material-icons text-2xl text-pink-500">group_add</span>
+            <span class="text-lg font-semibold text-gray-700">Utwórz grupę</span>
+          </button>
+
+          <button (click)="toggleFriendPopup()" class="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-100 transition">
+            <span class="material-icons text-pink-500">person_add</span>
+            <span class="text-lg font-semibold text-gray-700">Dodaj znajomego</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Popup dodawania znajomego -->
+      <app-mobile-add-friend *ngIf="showAddFriendPopup" (closed)="toggleFriendPopup()" />
+
+      <!-- Popup tworzenia grupy -->
+      <app-mobile-create-group *ngIf="showCreateGroupPopup" (closed)="toggleGroupPopup()" />
+
+      <!-- Popup tworzenie wydatku -->
+      <app-mobile-add-expense *ngIf="showAddExpensePopup" (closed)="toggleAddExpensePopup()" />
+
+    </nav>
+  `,
+  styles: [`
+    .material-icons {
+      font-size: 28px;
+    }
+  `]
+})
+export class MobileBottomNavbarComponent {
+  showMenu = false;
+  showAddFriendPopup = false;
+  showCreateGroupPopup = false;
+  showAddExpensePopup = false;
+
+
+  constructor(private router: Router) {}
+
+  navItems = [
+    { link: '/dashboard', icon: 'home' },
+    { link: '/groups', icon: 'groups' },
+    { link: '/friends', icon: 'group' },
+    { link: '/profile', icon: 'person' }
+  ];
+
+  isActive(path: string): boolean {
+    return this.router.url.startsWith(path);
+  }
+
+  openMenu() {
+    this.showMenu = true;
+  }
+
+  closeMenu() {
+    this.showMenu = false;
+  }
+
+  navigateTo(path: string) {
+    this.router.navigate([path]);
+    this.closeMenu();
+  }
+
+  toggleFriendPopup() {
+    this.showAddFriendPopup = !this.showAddFriendPopup;
+    this.closeMenu();
+  }
+
+  toggleGroupPopup() {
+    this.showCreateGroupPopup = !this.showCreateGroupPopup;
+    this.closeMenu();
+  }
+
+  toggleAddExpensePopup() {
+    this.showAddExpensePopup = !this.showAddExpensePopup;
+    this.closeMenu();
+  }
+}
