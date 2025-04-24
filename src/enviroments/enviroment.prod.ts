@@ -1,8 +1,8 @@
 export const environment = {
-  production: false,
+  production: true,
   api: {
-    server: 'http://localhost:8080/',
-    healthUrl: 'http://localhost:8080/api/health',
+    server: 'https://fynaloo-backend.onrender.com/',
+    healthUrl: 'https://fynaloo-backend.onrender.com/api/health',
     mapKey: '',
     googleAuthClientId: '',
     webSocketUrl: '',
