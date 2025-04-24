@@ -39,7 +39,10 @@ import {MobileHeaderComponent} from '../../components/shared/mobile-header.compo
                 Opis: <span class="font-normal">{{ debt.description }}</span>
               </div>
               <div *ngIf="debt.type === 'personal'" class="font-semibold text-gray-700">
-                Debtor: <span class="font-normal">{{ debt.debtor }}</span>
+                Zapłacone przez: <span class="font-normal">{{ debt.creditor }}</span>
+              </div>
+              <div *ngIf="debt.type === 'personal'" class="font-semibold text-gray-700">
+                Opis: <span class="font-normal">{{ debt.description }}</span>
               </div>
             </div>
 
@@ -51,6 +54,9 @@ import {MobileHeaderComponent} from '../../components/shared/mobile-header.compo
 
           <div *ngIf="debt.type === 'group'" class="text-sm text-gray-700">
             Twój udział: <span class="font-bold">{{ debt.yourDebt | currency:'PLN' }}</span>
+          </div>
+          <div *ngIf="debt.type === 'personal'" class="text-sm text-gray-700">
+            Do zapłaty: <span class="font-bold">{{ debt.amount | currency:'PLN' }}</span>
           </div>
 
           <!-- Licznik dla grupowego długu -->

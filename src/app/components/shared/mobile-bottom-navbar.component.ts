@@ -4,14 +4,15 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MobileAddFriendComponent } from '../mobile/friend/mobile-add-friend.component';
 import {MobileCreateGroupComponent} from '../mobile/group/mobile-create-group.component';
-import {MobileAddExpenseComponent} from '../mobile/mobile-add-expense.component';
+import {MobileAddExpenseComponent} from '../mobile/expense/mobile-add-expense.component';
+import {MobileManualDebtComponent} from '../mobile/manualDebt/mobile-manual-debt.component';
 
 @Component({
   standalone: true,
   selector: 'app-bottom-navbar',
-  imports: [CommonModule, RouterLink, MobileAddFriendComponent, MobileCreateGroupComponent, MobileAddExpenseComponent],
+  imports: [CommonModule, RouterLink, MobileAddFriendComponent, MobileCreateGroupComponent, MobileAddExpenseComponent, MobileManualDebtComponent],
   template: `
-    <nav class="fixed bottom-0 left-0 right-0 bg-pink-300 h-16 flex items-center justify-around z-50 shadow-inner">
+    <nav class="fixed bottom-0 left-0 right-0 bg-pink-300 h-16 flex items-center justify-around z-50 shadow-inner px-4 sm:px-6">
 
       <!-- Nawigacja -->
       <ng-container *ngFor="let item of navItems">
@@ -20,19 +21,17 @@ import {MobileAddExpenseComponent} from '../mobile/mobile-add-expense.component'
           class="relative flex flex-col items-center justify-center w-12 h-12"
           [ngClass]="{'bg-pink-100 rounded-full': isActive(item.link)}"
         >
-          <span class="material-icons text-2xl">
-            {{ item.icon }}
-          </span>
+      <span class="material-icons text-2xl">
+        {{ item.icon }}
+      </span>
         </a>
       </ng-container>
 
-      <!-- Kółko tła -->
-      <div class="absolute -top-13 left-[calc(50%+5px)] transform -translate-x-1/2 w-22 h-22 bg-white rounded-full z-10"></div>
 
       <!-- Przycisk "+" -->
-      <div class="absolute -top-9 left-[calc(50%+5px)] transform -translate-x-1/2 z-20">
-        <button (click)="openMenu()" class="w-16 h-16 rounded-full bg-gradient-to-r from-[#F50800] to-[#F200D1] flex items-center justify-center shadow-lg">
-          <span class="material-icons text-white text-4xl">add</span>
+      <div class="absolute -top-9 left-1/2 transform -translate-x-1/2 z-20">
+        <button (click)="openMenu()" class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-r from-[#F50800] to-[#F200D1] flex items-center justify-center shadow-lg">
+          <span class="material-icons text-white text-3xl sm:text-4xl">add</span>
         </button>
       </div>
 
@@ -44,7 +43,7 @@ import {MobileAddExpenseComponent} from '../mobile/mobile-add-expense.component'
             <span class="material-icons text-gray-400 hover:text-gray-600 text-3xl">close</span>
           </button>
 
-          <button (click)="navigateTo('/add-debt')" class="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-100 transition">
+          <button (click)="toggleAddManualDebtPopup()" class="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-100 transition">
             <span class="text-2xl">💳</span>
             <span class="text-lg font-semibold text-gray-700">Dodaj dług</span>
           </button>
@@ -80,6 +79,9 @@ import {MobileAddExpenseComponent} from '../mobile/mobile-add-expense.component'
       <!-- Popup tworzenie wydatku -->
       <app-mobile-add-expense *ngIf="showAddExpensePopup" (closed)="toggleAddExpensePopup()" />
 
+      <!-- Popup tworzenie manual debt -->
+      <app-mobile-manual-debt *ngIf="showManualDebtPopup" (closed)="toggleAddManualDebtPopup()" />
+
     </nav>
   `,
   styles: [`
@@ -93,6 +95,7 @@ export class MobileBottomNavbarComponent {
   showAddFriendPopup = false;
   showCreateGroupPopup = false;
   showAddExpensePopup = false;
+  showManualDebtPopup = false;
 
 
   constructor(private router: Router) {}
@@ -133,6 +136,11 @@ export class MobileBottomNavbarComponent {
 
   toggleAddExpensePopup() {
     this.showAddExpensePopup = !this.showAddExpensePopup;
+    this.closeMenu();
+  }
+
+  toggleAddManualDebtPopup() {
+    this.showManualDebtPopup = !this.showManualDebtPopup;
     this.closeMenu();
   }
 }

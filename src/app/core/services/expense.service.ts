@@ -23,7 +23,8 @@ export class ExpenseService {
           yourDebt: this.calculateYourDebt(expense),
           paidCount: this.calculatePaidCount(expense),
           countAllParticipant: this.countAllParticipant(expense),
-          description: expense.description
+          description: expense.description,
+          currency: expense.currency
         }))
       )
     );
@@ -36,6 +37,8 @@ export class ExpenseService {
           type: 'personal',
           id: debt.id,
           debtor: debt.debtor,
+          creditor: debt.creditor,
+          description: debt.description,
           amount: debt.amount
         }))
       )
