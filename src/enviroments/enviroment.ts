@@ -1,5 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
   api: {
     //server: 'http://localhost:8080/',
     server: 'https://fynaloo-backend.onrender.com/',
