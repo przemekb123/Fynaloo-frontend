@@ -1,7 +1,9 @@
 export const environment = {
   production: false,
   api: {
-    server: 'http://localhost:8080/',
+    //server: 'http://localhost:8080/',
+    server: 'https://fynaloo-backend.onrender.com/',
+    healthUrl: 'https://fynaloo-backend.onrender.com/api/health',
 
 
     //Additional features
