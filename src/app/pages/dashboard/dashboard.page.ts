@@ -15,12 +15,9 @@ import {MobileHeaderComponent} from '../../components/shared/mobile-header.compo
 
     <!-- Header -->
     <app-mobile-header />
-    <div class="bg-gradient-to-b from-[#f3f1ff] via-[#f9f8ff] to-white p-4 pt-10">
+    <div class="min-h-screen bg-gradient-to-b from-[#f3f1ff] via-[#f9f8ff] to-white p-4 pt-10">
 
-
-
-
-      <section class="pt-16 pb-24 px-4 bg-gradient-to-b from-[#f3f1ff] via-[#f9f8ff] to-white">
+      <section class="pt-16 pb-24 px-4 ">
         <div class="text-center mb-6">
           <h2 class="text-xl font-bold text-[var(--color-mobile-add-button)]">Twoje zobowiązania:</h2>
           <p class="text-gray-600 text-sm">Zobowiązania wobec ciebie:</p>
