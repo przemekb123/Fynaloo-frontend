@@ -20,8 +20,12 @@ export class AuthService {
   login(request: LoginRequestModel): Observable<{ token: string, user: UserDetailsModel }> {
     return this.http.post<{ token: string, user: UserDetailsModel }>(`${this.apiUrl}api/users/login`, request).pipe(
       tap(response => {
-        localStorage.setItem(this.tokenKey, response.token);
-        this.currentUserSubject.next(response.user);
+        if (response?.token) {
+          localStorage.setItem('jwt', response.token);
+          this.currentUserSubject.next(response.user);
+        } else {
+          console.warn('Brak tokena w odpowiedzi backendu.');
+        }
       })
     );
   }
