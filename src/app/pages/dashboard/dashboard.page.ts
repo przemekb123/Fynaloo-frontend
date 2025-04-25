@@ -12,73 +12,72 @@ import {MobileHeaderComponent} from '../../components/shared/mobile-header.compo
   selector: 'app-dashboard',
   imports: [CommonModule, MobileBottomNavbarComponent, MobileHeaderComponent],
   template: `
-    <div class="min-h-screen bg-white-100 p-4">
 
-      <!-- Header -->
-      <app-mobile-header />
+    <!-- Header -->
+    <app-mobile-header />
+    <div class="bg-gradient-to-b from-[#f3f1ff] via-[#f9f8ff] to-white p-4 pt-10">
 
-      <!-- Section Title -->
-      <div class="mb-4 text-center">
-        <h2 class="text-lg font-semibold">Twoje zobowiązania:</h2>
-        <h3 class="text-md text-gray-600">Zobowiązania wobec ciebie:</h3>
-      </div>
 
-      <hr class="border-gray-300 mb-6" />
 
-      <!-- Lista długów -->
-      <div class="flex flex-col gap-6">
 
-        <div *ngFor="let debt of debts" class="border rounded-xl bg-white shadow-sm p-4 flex flex-col gap-2">
+      <section class="pt-16 pb-24 px-4 bg-gradient-to-b from-[#f3f1ff] via-[#f9f8ff] to-white">
+        <div class="text-center mb-6">
+          <h2 class="text-xl font-bold text-[var(--color-mobile-add-button)]">Twoje zobowiązania:</h2>
+          <p class="text-gray-600 text-sm">Zobowiązania wobec ciebie:</p>
+        </div>
 
-          <div class="flex justify-between items-center">
-            <div>
-              <div *ngIf="debt.type === 'group'" class="font-semibold text-gray-700">
-                Zapłacone przez: <span class="font-normal">{{ debt.paidBy }}</span>
+        <div class="flex flex-col gap-4">
+          <div *ngFor="let debt of debts" class="bg-white rounded-2xl shadow-md px-4 py-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <p class="text-[13px] font-bold text-[var(--color-mobile-add-button)]">
+                  Zapłacone przez: <span class="font-medium">{{ debt.type === 'group' ? debt.paidBy : debt.creditor }}</span>
+                </p>
+                <p class="text-sm text-gray-700">Opis: {{ debt.description }}</p>
+                <p class="text-sm mt-1">
+            <span class="text-[var(--color-mobile-add-button)] font-semibold">
+              {{ debt.type === 'group' ? 'Twój udział:' : 'Do zapłaty:' }}
+            </span>
+                  <span class="ml-1 font-bold">
+                    {{ debt.type === 'group' ? (debt.yourDebt | currency:debt.currency) : (debt.amount | currency:debt.currency) }}
+            </span>
+                </p>
               </div>
-              <div *ngIf="debt.type === 'group'" class="font-semibold text-gray-700">
-                Opis: <span class="font-normal">{{ debt.description }}</span>
-              </div>
-              <div *ngIf="debt.type === 'personal'" class="font-semibold text-gray-700">
-                Zapłacone przez: <span class="font-normal">{{ debt.creditor }}</span>
-              </div>
-              <div *ngIf="debt.type === 'personal'" class="font-semibold text-gray-700">
-                Opis: <span class="font-normal">{{ debt.description }}</span>
+
+              <div class="flex flex-col items-center gap-2">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center bg-[var(--color-mobile-add-button)]">
+                    <span
+                      class="material-symbols-outlined text-white translate-y-[-1px] "
+                      style="font-variation-settings: 'wght' 250, 'opsz' 24;"
+                    >
+                        {{ debt.type === 'group' ? 'groups' : 'person' }}
+                    </span>
+                </div>
+                <button *ngIf="debt.type === 'group'" (click)="settleGroupDebt(debt.id)" class="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center">
+                  <span class="material-icons-outlined text-white text-sm">check</span>
+                </button>
               </div>
             </div>
 
-            <span class="material-icons text-3xl text-gray-700">
-              {{ debt.type === 'group' ? 'groups' : 'person' }}
-            </span>
+            <div class="h-1 bg-gray-200 rounded-full mt-3 overflow-hidden">
+              <div
+                class="h-full bg-[var(--color-mobile-add-button)]"
+                [style.width.%]="(debt.paidCount / debt.countAllParticipant) * 100"
+              ></div>
+            </div>
+
+            <!-- Details + licznik -->
+            <div class="mt-3 flex justify-between items-center text-xs text-gray-500">
+              <span class="font-medium">details</span>
+              <span *ngIf="debt.type === 'group'" class="text-[11px]">
+                 Spłacono: {{ debt.paidCount }}/{{ debt.countAllParticipant }}
+                </span>
+            </div>
           </div>
-
-
-          <div *ngIf="debt.type === 'group'" class="text-sm text-gray-700">
-            Twój udział: <span class="font-bold">{{ debt.yourDebt | currency:'PLN' }}</span>
-          </div>
-          <div *ngIf="debt.type === 'personal'" class="text-sm text-gray-700">
-            Do zapłaty: <span class="font-bold">{{ debt.amount | currency:'PLN' }}</span>
-          </div>
-
-          <!-- Licznik dla grupowego długu -->
-          <div *ngIf="debt.type === 'group'" class="text-xs text-gray-500">
-            {{ debt.paidCount }}/{{ debt.countAllParticipant}}
-          </div>
-
-
-
-          <!-- Przycisk "details" -->
-          <div class="flex justify-between items-center mt-2">
-            <span class="text-sm font-semibold text-gray-700">details</span>
-
-            <button class="flex items-center gap-1 text-green-500" *ngIf="debt.type === 'group'" (click)="settleGroupDebt(debt.id)">
-              <span class="material-icons text-2xl">check_circle</span>
-            </button>
-          </div>
-
         </div>
+      </section>
 
-      </div>
-        <app-bottom-navbar></app-bottom-navbar>
+      <app-bottom-navbar></app-bottom-navbar>
     </div>
   `
 })

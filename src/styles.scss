@@ -1,2 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
+
+:root {
+  --color-regal-blue: #243c5a;
+
+  --color-mobile-navbar: #493f8d;
+  --color-mobile-add-button: #6c55e1;
+}

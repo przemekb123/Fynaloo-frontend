@@ -1,8 +1,7 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import {FriendService} from '../../../core/services/friend.service';
-
+import { FriendService } from '../../../core/services/friend.service';
 
 @Component({
   standalone: true,
@@ -11,21 +10,34 @@ import {FriendService} from '../../../core/services/friend.service';
   template: `
     <div class="fixed inset-0 bg-black bg-opacity-40 flex items-end z-50" (click)="closePopup()">
       <div class="bg-white w-full rounded-t-3xl p-6 pt-12 flex flex-col gap-4 relative" (click)="$event.stopPropagation()">
+
         <button (click)="closePopup()" class="absolute top-4 right-4">
           <span class="material-icons text-gray-400 hover:text-gray-600 text-3xl">close</span>
         </button>
 
-        <h2 class="text-lg font-bold text-center text-pink-500">Dodaj znajomego</h2>
+        <h2 class="text-lg font-bold text-center text-[var(--color-mobile-add-button)]">Dodaj znajomego</h2>
 
         <form [formGroup]="form" (ngSubmit)="addFriend()" class="flex flex-col gap-4">
           <input
             type="text"
             formControlName="username"
             placeholder="Nazwa użytkownika"
-            class="p-3 border rounded-lg focus:ring-2 focus:ring-pink-400"
+            class="p-3 border rounded-lg focus:ring-2 focus:ring-[var(--color-mobile-add-button)]"
           />
-          <button type="submit" [disabled]="form.invalid"
-                  class="bg-pink-500 text-white font-semibold py-3 rounded-lg hover:bg-pink-600 transition disabled:opacity-50">
+
+          <div *ngIf="form.get('username')?.invalid && form.get('username')?.touched" class="text-xs text-red-500">
+            Pole wymagane
+          </div>
+
+          <div *ngIf="selfInviteError" class="text-xs text-red-500">
+            Nie możesz zaprosić samego siebie.
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="form.invalid"
+            class="bg-[var(--color-mobile-add-button)] text-white font-semibold py-3 rounded-lg hover:bg-indigo-600 transition disabled:opacity-50"
+          >
             Wyślij zaproszenie
           </button>
         </form>
@@ -37,11 +49,13 @@ import {FriendService} from '../../../core/services/friend.service';
   `
 })
 export class MobileAddFriendComponent {
+  @Input() currentUsername = ''; // ← aktualny użytkownik
+  @Output() closed = new EventEmitter<void>();
+
   form: FormGroup;
   successMessage = '';
   errorMessage = '';
-
-  @Output() closed = new EventEmitter<void>();
+  selfInviteError = false;
 
   constructor(private fb: FormBuilder, private friendService: FriendService) {
     this.form = this.fb.group({
@@ -51,7 +65,17 @@ export class MobileAddFriendComponent {
 
   addFriend() {
     if (this.form.invalid) return;
-    const username = this.form.value.username;
+
+    const username = this.form.value.username.trim();
+
+    if (username === this.currentUsername) {
+      this.selfInviteError = true;
+      this.successMessage = '';
+      this.errorMessage = '';
+      return;
+    }
+
+    this.selfInviteError = false;
 
     this.friendService.sendFriendRequest(username).subscribe({
       next: () => {

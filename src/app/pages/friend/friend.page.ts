@@ -3,17 +3,17 @@ import { CommonModule } from '@angular/common';
 import { FriendService } from '../../core/services/friend.service';
 import { FriendModel } from '../../models/DTO/friend.model';
 import { MobileBottomNavbarComponent } from '../../components/shared/mobile-bottom-navbar.component';
+import {MobileHeaderComponent} from '../../components/shared/mobile-header.component';
 
 @Component({
   standalone: true,
   selector: 'app-friends',
-  imports: [CommonModule, MobileBottomNavbarComponent],
+  imports: [CommonModule, MobileBottomNavbarComponent, MobileHeaderComponent],
   template: `
-    <div class="min-h-screen bg-white-100 p-4">
+    <div class="min-h-screen bg-gradient-to-b from-[#f3f1ff] via-[#f9f8ff] to-white p-4 pt-20">
 
-      <header class="bg-pink-400 py-6 flex items-center justify-center rounded-b-3xl shadow-md mb-6">
-        <h1 class="text-2xl font-bold text-white">Znajomi</h1>
-      </header>
+      <app-mobile-header />
+
 
       <div class="flex flex-col gap-4">
 

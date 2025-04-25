@@ -6,31 +6,43 @@ import { MobileAddFriendComponent } from '../mobile/friend/mobile-add-friend.com
 import {MobileCreateGroupComponent} from '../mobile/group/mobile-create-group.component';
 import {MobileAddExpenseComponent} from '../mobile/expense/mobile-add-expense.component';
 import {MobileManualDebtComponent} from '../mobile/manualDebt/mobile-manual-debt.component';
+import {AuthService} from '../../core/services/auth.service';
 
 @Component({
   standalone: true,
   selector: 'app-bottom-navbar',
   imports: [CommonModule, RouterLink, MobileAddFriendComponent, MobileCreateGroupComponent, MobileAddExpenseComponent, MobileManualDebtComponent],
   template: `
-    <nav class="fixed bottom-0 left-0 right-0 bg-pink-300 h-16 flex items-center justify-around z-50 shadow-inner px-4 sm:px-6">
+    <nav class="fixed  bottom-0 rounded-t-3xl left-0 right-0 bg-[var(--color-mobile-navbar)] h-16 flex items-center justify-around z-50 shadow-inner px-4 sm:px-6">
 
       <!-- Nawigacja -->
       <ng-container *ngFor="let item of navItems">
         <a
           [routerLink]="item.link"
           class="relative flex flex-col items-center justify-center w-12 h-12"
-          [ngClass]="{'bg-pink-100 rounded-full': isActive(item.link)}"
         >
-      <span class="material-icons text-2xl">
-        {{ item.icon }}
-      </span>
+    <span
+      class="material-symbols-outlined text-[16px]"
+      [ngStyle]="{
+        'font-variation-settings': isActive(item.link)
+            ? '\\'FILL\\' 1, \\'wght\\' 400, \\'GRAD\\' 0, \\'opsz\\' 40'
+            : '\\'FILL\\' 0, \\'wght\\' 300, \\'GRAD\\' 100, \\'opsz\\' 40'
+        }"
+      [ngClass]="{
+        'text-white': isActive(item.link),
+        'text-white/70': !isActive(item.link)
+      }"
+    >
+      {{ item.icon }}
+    </span>
+          <span class="text-[10px] text-white mt-1">{{ item.label }}</span>
         </a>
       </ng-container>
 
 
       <!-- Przycisk "+" -->
       <div class="absolute -top-9 left-1/2 transform -translate-x-1/2 z-20">
-        <button (click)="openMenu()" class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-r from-[#F50800] to-[#F200D1] flex items-center justify-center shadow-lg">
+        <button (click)="openMenu()" class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[var(--color-mobile-add-button)] from-[#F50800] to-[#F200D1] flex items-center justify-center shadow-lg">
           <span class="material-icons text-white text-3xl sm:text-4xl">add</span>
         </button>
       </div>
@@ -71,8 +83,11 @@ import {MobileManualDebtComponent} from '../mobile/manualDebt/mobile-manual-debt
       </div>
 
       <!-- Popup dodawania znajomego -->
-      <app-mobile-add-friend *ngIf="showAddFriendPopup" (closed)="toggleFriendPopup()" />
-
+      <app-mobile-add-friend
+        *ngIf="showAddFriendPopup"
+        [currentUsername]="authService.getCurrentUsername()"
+        (closed)="showAddFriendPopup = false"
+      />
       <!-- Popup tworzenia grupy -->
       <app-mobile-create-group *ngIf="showCreateGroupPopup" (closed)="toggleGroupPopup()" />
 
@@ -98,13 +113,13 @@ export class MobileBottomNavbarComponent {
   showManualDebtPopup = false;
 
 
-  constructor(private router: Router) {}
+  constructor(private router: Router,public authService : AuthService) {}
 
   navItems = [
-    { link: '/dashboard', icon: 'home' },
-    { link: '/groups', icon: 'groups' },
-    { link: '/friends', icon: 'group' },
-    { link: '/profile', icon: 'person' }
+    { link: '/dashboard', icon: 'home', label: 'Home' },
+    { link: '/groups', icon: 'groups', label: 'Grupy' },
+    { link: '/friends', icon: 'group', label: 'Znajomi' },
+    { link: '/profile', icon: 'person', label: 'Profil' }
   ];
 
   isActive(path: string): boolean {

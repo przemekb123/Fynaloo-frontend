@@ -11,19 +11,18 @@ import {MobileBottomNavbarComponent} from '../../components/shared/mobile-bottom
   selector: 'app-create-group',
   imports: [CommonModule, ReactiveFormsModule, MobileBottomNavbarComponent],
   template: `
-    <div class="min-h-screen flex flex-col justify-center items-center bg-white-100 p-4">
-      <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
-        <h1 class="text-3xl font-bold mb-6 text-center text-pink-500">Utwórz grupę</h1>
+    <div class="min-h-screen flex flex-col justify-start items-center bg-gradient-to-b from-[#f3f1ff] via-[#f9f8ff] to-white pt-24 px-4 pb-32">
+      <div class="bg-white px-6 py-8 rounded-3xl shadow-lg w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center text-[var(--color-mobile-add-button)] mb-6 tracking-wide">Utwórz nową grupę</h1>
 
-        <form [formGroup]="form" (ngSubmit)="createGroup()" class="flex flex-col gap-6">
-
+        <form [formGroup]="form" (ngSubmit)="createGroup()" class="flex flex-col gap-5">
           <div class="flex flex-col">
             <label class="mb-1 text-sm font-semibold text-gray-700">Nazwa grupy</label>
             <input
               type="text"
               formControlName="groupName"
               placeholder="Wpisz nazwę grupy"
-              class="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition duration-200"
+              class="p-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-mobile-add-button)] focus:border-transparent text-sm"
             />
             <div *ngIf="form.get('groupName')?.invalid && form.get('groupName')?.touched" class="text-xs text-red-500 mt-1">
               Pole wymagane
@@ -33,14 +32,16 @@ import {MobileBottomNavbarComponent} from '../../components/shared/mobile-bottom
           <button
             type="submit"
             [disabled]="form.invalid"
-            class="bg-pink-500 hover:bg-pink-600 transition text-white py-3 rounded-lg font-semibold disabled:opacity-50"
+            class="bg-[var(--color-mobile-add-button)] hover:bg-indigo-600 transition text-white py-3 rounded-xl font-semibold text-sm disabled:opacity-50"
           >
             Utwórz grupę
           </button>
         </form>
       </div>
+
       <app-bottom-navbar />
     </div>
+
   `
 })
 export class CreateGroupPage {
