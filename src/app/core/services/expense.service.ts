@@ -14,7 +14,7 @@ export class ExpenseService {
   constructor(private http: HttpClient, private authService: AuthService) {}
 
   getExpensesForUser(userId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/user/${userId}`, { withCredentials: true }).pipe(
+    return this.http.get<any[]>(`${this.apiUrl}/user/${userId}`).pipe(
       map(expenses =>
         expenses.map(expense => ({
           type: 'group',
@@ -31,7 +31,7 @@ export class ExpenseService {
   }
 
   getManualDebtsForUser(userId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.manualDebtUrl}/user/${userId}`, { withCredentials: true }).pipe(
+    return this.http.get<any[]>(`${this.manualDebtUrl}/user/${userId}`).pipe(
       map(debts =>
         debts.map(debt => ({
           type: 'personal',
@@ -68,10 +68,10 @@ export class ExpenseService {
   }
 
   createExpense(request: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, request, { withCredentials: true });
+    return this.http.post<any>(this.apiUrl, request);
   }
 
   settleExpense(expenseId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${expenseId}/settle`, {}, { withCredentials: true });
+    return this.http.post(`${this.apiUrl}/${expenseId}/settle`, {});
   }
 }

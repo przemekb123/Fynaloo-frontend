@@ -12,7 +12,7 @@ export class ManualDebtService {
   constructor(private http: HttpClient) {}
 
   getDebtsForUser(userId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/user/${userId}`, { withCredentials: true });
+    return this.http.get<any[]>(`${this.baseUrl}/user/${userId}`);
   }
 
   addManualDebt(request: any): Observable<any> {
@@ -20,14 +20,14 @@ export class ManualDebtService {
   }
 
   settleDebt(debtId: number): Observable<string> {
-    return this.http.post<string>(`${this.baseUrl}/${debtId}/settle`, {}, { withCredentials: true });
+    return this.http.post<string>(`${this.baseUrl}/${debtId}/settle`, {});
   }
 
   recalculateDebt(request: any): Observable<string> {
-    return this.http.post<string>(`${this.baseUrl}/recalculate`, request, { withCredentials: true });
+    return this.http.post<string>(`${this.baseUrl}/recalculate`, request);
   }
 
   adjustPriceDifference(request: any): Observable<string> {
-    return this.http.post<string>(`${this.baseUrl}/adjust-price-difference`, request, { withCredentials: true });
+    return this.http.post<string>(`${this.baseUrl}/adjust-price-difference`, request);
   }
 }

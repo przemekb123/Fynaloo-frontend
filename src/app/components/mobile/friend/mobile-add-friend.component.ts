@@ -8,7 +8,7 @@ import { FriendService } from '../../../core/services/friend.service';
   selector: 'app-mobile-add-friend',
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="fixed inset-0 bg-black bg-opacity-40 flex items-end z-50" (click)="closePopup()">
+    <div class="fixed inset-0 bg-black bg-opacity-40 flex items-end z-[999] " (click)="closePopup()">
       <div class="bg-white w-full rounded-t-3xl p-6 pt-12 flex flex-col gap-4 relative" (click)="$event.stopPropagation()">
 
         <button (click)="closePopup()" class="absolute top-4 right-4">

@@ -48,34 +48,34 @@ export class GroupService {
    * Usuwa grupę.
    */
   deleteGroup(groupId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/delete/${groupId}`, { withCredentials: true });
+    return this.http.delete<void>(`${this.apiUrl}/delete/${groupId}`);
   }
 
   /**
    * Wysyła zaproszenie do grupy na podstawie username.
    */
   sendInvitation(groupId: number, username: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/${groupId}/invite`, { username }, { withCredentials: true });
+    return this.http.post<void>(`${this.apiUrl}/${groupId}/invite`, { username });
   }
 
   /**
    * Pobiera zaproszenia do grup (dla aktualnego użytkownika).
    */
   listInvitations(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/invitations`, { withCredentials: true });
+    return this.http.get<any[]>(`${this.apiUrl}/invitations`);
   }
 
   /**
    * Akceptuje zaproszenie do grupy.
    */
   acceptInvitation(invitationId: number): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/invitations/${invitationId}/accept`, {}, { withCredentials: true });
+    return this.http.post<void>(`${this.apiUrl}/invitations/${invitationId}/accept`, {});
   }
 
   /**
    * Odrzuca zaproszenie do grupy.
    */
   rejectInvitation(invitationId: number): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/invitations/${invitationId}/reject`, {}, { withCredentials: true });
+    return this.http.post<void>(`${this.apiUrl}/invitations/${invitationId}/reject`, {});
   }
 }

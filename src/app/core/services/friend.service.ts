@@ -12,22 +12,22 @@ export class FriendService {
   constructor(private http: HttpClient) {}
 
   listFriends(): Observable<FriendModel[]> {
-    return this.http.get<FriendModel[]>(`${this.apiUrl}`, { withCredentials: true });
+    return this.http.get<FriendModel[]>(`${this.apiUrl}`);
   }
 
   listPendingRequests(): Observable<FriendRequest[]> {
-    return this.http.get<FriendRequest[]>(`${this.apiUrl}/requests`, { withCredentials: true });
+    return this.http.get<FriendRequest[]>(`${this.apiUrl}/requests`);
   }
 
   sendFriendRequest(username: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/request`, { username }, { withCredentials: true });
+    return this.http.post<void>(`${this.apiUrl}/request`, { username });
   }
 
   acceptFriendRequest(userId: number): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/accept`, { userId }, { withCredentials: true });
+    return this.http.post<void>(`${this.apiUrl}/accept`, { userId } );
   }
 
   rejectFriendRequest(userId: number): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/reject`, { userId }, { withCredentials: true });
+    return this.http.post<void>(`${this.apiUrl}/reject`, { userId });
   }
 }

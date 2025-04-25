@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap } from 'rxjs';
-import {UserDetailsModel} from '../../models/DTO/user-details.model';
-import {LoginRequestModel} from '../../models/Requests/login-request.model';
-import {RegistrationRequestModel} from '../../models/Requests/registration-request.model';
-import {environment} from '../../../enviroments/enviroment';
-
+import { Observable, BehaviorSubject, tap, of } from 'rxjs';
+import { UserDetailsModel } from '../../models/DTO/user-details.model';
+import { LoginRequestModel } from '../../models/Requests/login-request.model';
+import { RegistrationRequestModel } from '../../models/Requests/registration-request.model';
+import { environment } from '../../../enviroments/enviroment';
+import { JwtHelperService } from '@auth0/angular-jwt';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -13,36 +13,65 @@ export class AuthService {
   currentUser$ = this.currentUserSubject.asObservable();
 
   private apiUrl = environment.api.server;
+  private tokenKey = 'jwt'; // tylko nazwa klucza, nie sam token
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private jwtHelper: JwtHelperService) {}
 
-
-  login(request: LoginRequestModel): Observable<UserDetailsModel> {
-    return this.http.post<UserDetailsModel>(this.apiUrl + 'api/users/login', request, { withCredentials: true }).pipe(
-      tap(user => this.currentUserSubject.next(user))
+  login(request: LoginRequestModel): Observable<{ token: string, user: UserDetailsModel }> {
+    return this.http.post<{ token: string, user: UserDetailsModel }>(`${this.apiUrl}api/users/login`, request).pipe(
+      tap(response => {
+        localStorage.setItem(this.tokenKey, response.token);
+        this.currentUserSubject.next(response.user);
+      })
     );
   }
 
-  register(request: RegistrationRequestModel): Observable<UserDetailsModel> {
-    return this.http.post<UserDetailsModel>(this.apiUrl + 'api/users/register', request, { withCredentials: true }).pipe(
-      tap(user => this.currentUserSubject.next(user))
+  register(request: RegistrationRequestModel): Observable<{ token: string, user: UserDetailsModel }> {
+    return this.http.post<{ token: string, user: UserDetailsModel }>(`${this.apiUrl}api/users/register`, request).pipe(
+      tap(response => {
+        localStorage.setItem(this.tokenKey, response.token);
+        this.currentUserSubject.next(response.user);
+      })
     );
   }
 
-  logout(): Observable<void> {
-    return this.http.post<void>(this.apiUrl + 'api/users/logout', {}, { withCredentials: true }).pipe(
-      tap(() => this.currentUserSubject.next(null))
-    );
+  logout(): void {
+    localStorage.removeItem(this.tokenKey);
+    this.currentUserSubject.next(null);
   }
 
-  checkAuth(): Observable<UserDetailsModel> {
-    return this.http.get<UserDetailsModel>(this.apiUrl +  'api/users/me', { withCredentials: true }).pipe(
-      tap(user => this.currentUserSubject.next(user))
-    );
+  checkAuth(): Observable<UserDetailsModel | null> {
+    const token = localStorage.getItem(this.tokenKey);
+    if (token && !this.jwtHelper.isTokenExpired(token)) {
+      const user = this.decodeToken(token);
+      this.currentUserSubject.next(user);
+      return of(user);
+    } else {
+      this.logout();
+      return of(null);
+    }
+  }
+
+  private decodeToken(token: string): UserDetailsModel {
+    const decoded = this.jwtHelper.decodeToken(token);
+    return {
+      id: decoded.id,
+      username: decoded.sub,
+      email: decoded.email,
+      firstName: decoded.firstName,
+      lastName: decoded.lastName,
+      groups: [],
+      debts: []
+    };
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem(this.tokenKey);
   }
 
   isAuthenticated(): boolean {
-    return this.currentUserSubject.value !== null;
+    const token = this.getToken();
+    return token !== null && !this.jwtHelper.isTokenExpired(token);
   }
 
   getCurrentUsername(): string {
