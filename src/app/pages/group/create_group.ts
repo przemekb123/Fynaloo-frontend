@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { GroupService } from '../../core/services/group.service';
 import { AuthService } from '../../core/services/auth.service';
 import {MobileBottomNavbarComponent} from '../../components/shared/mobile-bottom-navbar.component';
+import {CreateGroupRequest} from '../../models/Requests/create-group-request';
+import {filter, switchMap, take} from 'rxjs';
 
 @Component({
   standalone: true,
@@ -61,14 +63,22 @@ export class CreateGroupPage {
   createGroup() {
     if (this.form.invalid) return;
 
-    const request = {
-      creatorId: this.authService.getCurrentUserId(), // <- pobieramy aktualnego usera
-      groupName: this.form.value.groupName
-    };
+    this.authService.currentUser$
+      .pipe(
 
-    this.groupService.createGroup(request).subscribe({
-      next: () => this.router.navigate(['/groups']),
-      error: err => console.error('Błąd tworzenia grupy', err)
-    });
+        filter(user => !!user),
+        take(1),
+        switchMap(user => {
+          const request: CreateGroupRequest = {
+            creatorId: user!.id,
+            groupName: this.form.value.groupName
+          };
+          return this.groupService.createGroup(request);
+        })
+      )
+      .subscribe({
+        next: () => this.router.navigate(['/groups']),
+        error: err => console.error('Błąd tworzenia grupy', err)
+      });
   }
 }

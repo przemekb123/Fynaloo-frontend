@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {GroupService} from '../../../core/services/group.service';
 import {AuthService} from '../../../core/services/auth.service';
+import {filter, switchMap, take} from 'rxjs';
 
 @Component({
   standalone: true,
@@ -60,22 +61,29 @@ export class MobileCreateGroupComponent {
   createGroup() {
     if (this.form.invalid) return;
 
-    const request = {
-      creatorId: this.authService.getCurrentUserId(),
-      groupName: this.form.value.groupName
-    };
-
-    this.groupService.createGroup(request).subscribe({
-      next: () => {
-        this.successMessage = 'Grupa została utworzona!';
-        this.form.reset();
-        setTimeout(() => this.closePopup(), 1000);
-      },
-      error: err => {
-        console.error('Błąd tworzenia grupy', err);
-        this.errorMessage = 'Nie udało się utworzyć grupy.';
-      }
-    });
+    this.authService.currentUser$
+      .pipe(
+        filter(user => !!user),
+        take(1),
+        switchMap(user => {
+          const request = {
+            creatorId: user!.id,
+            groupName: this.form.value.groupName
+          };
+          return this.groupService.createGroup(request);
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.successMessage = 'Grupa została utworzona!';
+          this.form.reset();
+          setTimeout(() => this.closePopup(), 1000);
+        },
+        error: err => {
+          console.error('Błąd tworzenia grupy', err);
+          this.errorMessage = 'Nie udało się utworzyć grupy.';
+        }
+      });
   }
 
   closePopup() {

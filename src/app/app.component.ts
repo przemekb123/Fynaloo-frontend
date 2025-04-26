@@ -16,9 +16,9 @@ export class AppComponent implements OnInit {
   constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
-    this.authService.checkAuth().subscribe(user => {
-      if (user) {
-        console.log('Zalogowany jako:', user.username);
+    this.authService.checkAuth().subscribe(response => {
+      if (response.user) {
+        console.log('Zalogowany jako:', response.user.username);
       } else {
         console.log('Brak aktywnej sesji');
       }

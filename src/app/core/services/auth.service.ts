@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap, of } from 'rxjs';
+import {Observable, BehaviorSubject, tap, of, map} from 'rxjs';
 import { UserDetailsModel } from '../../models/DTO/user-details.model';
 import { LoginRequestModel } from '../../models/Requests/login-request.model';
 import { RegistrationRequestModel } from '../../models/Requests/registration-request.model';
@@ -15,7 +15,9 @@ export class AuthService {
   private apiUrl = environment.api.server;
   private tokenKey = 'jwt'; // tylko nazwa klucza, nie sam token
 
-  constructor(private http: HttpClient, private jwtHelper: JwtHelperService) {}
+  constructor(private http: HttpClient, private jwtHelper: JwtHelperService) {
+    this.checkAuth().subscribe();
+  }
 
   login(request: LoginRequestModel): Observable<{ token: string, user: UserDetailsModel }> {
     return this.http.post<{ token: string, user: UserDetailsModel }>(`${this.apiUrl}api/users/login`, request).pipe(
@@ -44,15 +46,25 @@ export class AuthService {
     this.currentUserSubject.next(null);
   }
 
-  checkAuth(): Observable<UserDetailsModel | null> {
+  checkAuth(): Observable<{ token: string, user: UserDetailsModel | null }> {
     const token = localStorage.getItem(this.tokenKey);
+
     if (token && !this.jwtHelper.isTokenExpired(token)) {
-      const user = this.decodeToken(token);
-      this.currentUserSubject.next(user);
-      return of(user);
+      return this.http.get<UserDetailsModel>(`${this.apiUrl}api/users/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).pipe(
+        tap(user => {
+          this.currentUserSubject.next(user);
+          console.log(user)
+        }),
+
+        map(user => ({ token, user }))
+      );
     } else {
       this.logout();
-      return of(null);
+      return of({ token: '', user: null });
     }
   }
 
