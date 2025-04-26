@@ -3,6 +3,7 @@ export const environment = {
   api: {
     server: 'https://fynaloo-backend.onrender.com/',
     healthUrl: 'https://fynaloo-backend.onrender.com/api/health',
+    nbpApi: "https://api.nbp.pl/api/exchangerates/rates/a/",
     mapKey: '',
     googleAuthClientId: '',
     webSocketUrl: '',
