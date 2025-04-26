@@ -6,6 +6,7 @@ import {MobileBottomNavbarComponent} from '../../components/shared/mobile-bottom
 import {Router} from '@angular/router';
 import {ExpenseService} from '../../core/services/expense.service';
 import {MobileHeaderComponent} from '../../components/shared/mobile-header.component';
+import {CurrencyService} from '../../core/services/currency.service';
 
 @Component({
   standalone: true,
@@ -32,13 +33,25 @@ import {MobileHeaderComponent} from '../../components/shared/mobile-header.compo
                 </p>
                 <p class="text-sm text-gray-700">Opis: {{ debt.description }}</p>
                 <p class="text-sm mt-1">
-            <span class="text-[var(--color-mobile-add-button)] font-semibold">
-              {{ debt.type === 'group' ? 'Twój udział:' : 'Do zapłaty:' }}
-            </span>
+                <span class="text-[var(--color-mobile-add-button)] font-semibold">
+                  {{ debt.type === 'group' ? 'Twój udział:' : 'Do zapłaty:' }}
+                </span>
                   <span class="ml-1 font-bold">
-                    {{ debt.type === 'group' ? (debt.yourDebt | currency:debt.currency) : (debt.amount | currency:debt.currency) }}
-            </span>
+
+                  <!-- Jeśli waluta nie PLN -->
+                  <ng-container *ngIf="debt.currency !== 'PLN'; else onlyPln">
+                    {{ (debt.type === 'group' ? debt.yourDebt : debt.amount) | currency:debt.currency }}
+                    ({{ getAmountInPln(debt) | number:'1.2-2' }} PLN)
+                  </ng-container>
+
+                                  <!-- Jeśli waluta PLN -->
+                  <ng-template #onlyPln>
+                    {{ (debt.type === 'group' ? debt.yourDebt : debt.amount) | currency:'PLN' }}
+                  </ng-template>
+
+                </span>
                 </p>
+
               </div>
 
               <div class="flex flex-col items-center gap-2">
@@ -81,9 +94,10 @@ import {MobileHeaderComponent} from '../../components/shared/mobile-header.compo
 export class DashboardPage implements OnInit {
   username = '';
   debts: any[] = [];
+  exchangeRates: { [currency: string]: number } = {};
+  selectedCurrency: string = 'PLN';
 
-
-  constructor(private authService: AuthService, private expenseService: ExpenseService, private router: Router) {}
+  constructor(private authService: AuthService, private expenseService: ExpenseService, private router: Router,   private currencyService: CurrencyService) {}
 
   ngOnInit(): void {
     // Jeśli użytkownik już zalogowany — pobierz dane
@@ -97,6 +111,13 @@ export class DashboardPage implements OnInit {
     this.expenseService.getExpensesForUser(userId).subscribe(expenses => {
       this.expenseService.getManualDebtsForUser(userId).subscribe(debts => {
         this.debts = [...expenses, ...debts];
+
+        const uniqueCurrencies = new Set(this.debts.map(d => d.currency));
+        uniqueCurrencies.forEach(currency => {
+          this.currencyService.getExchangeRate(currency).subscribe(rate => {
+            this.exchangeRates[currency] = rate;
+          });
+        });
       });
     });
   }
@@ -106,5 +127,11 @@ export class DashboardPage implements OnInit {
       next: () => this.loadDebts(),
       error: err => console.error('Błąd przy spłacie długu', err)
     });
+  }
+
+  getAmountInPln(debt: any): number {
+    const amount = debt.type === 'group' ? debt.yourDebt : debt.amount;
+    const rate = this.exchangeRates[debt.currency] || 1;
+    return amount * rate;
   }
 }
