@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {Observable, BehaviorSubject, tap, of, map} from 'rxjs';
+import {Observable, BehaviorSubject, tap, of, map, catchError} from 'rxjs';
 import { UserDetailsModel } from '../../models/DTO/user-details.model';
 import { LoginRequestModel } from '../../models/Requests/login-request.model';
 import { RegistrationRequestModel } from '../../models/Requests/registration-request.model';
@@ -16,7 +16,6 @@ export class AuthService {
   private tokenKey = 'jwt'; // tylko nazwa klucza, nie sam token
 
   constructor(private http: HttpClient, private jwtHelper: JwtHelperService) {
-    this.checkAuth().subscribe();
   }
 
   login(request: LoginRequestModel): Observable<{ token: string, user: UserDetailsModel }> {
@@ -49,24 +48,38 @@ export class AuthService {
   checkAuth(): Observable<{ token: string, user: UserDetailsModel | null }> {
     const token = localStorage.getItem(this.tokenKey);
 
-    if (token && !this.jwtHelper.isTokenExpired(token)) {
-      return this.http.get<UserDetailsModel>(`${this.apiUrl}api/users/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).pipe(
-        tap(user => {
-          this.currentUserSubject.next(user);
-          console.log(user)
-        }),
-
-        map(user => ({ token, user }))
-      );
-    } else {
+    if (!token || token.trim() === '') {
       this.logout();
       return of({ token: '', user: null });
     }
+
+    try {
+      if (this.jwtHelper.isTokenExpired(token)) {
+        this.logout();
+        return of({ token: '', user: null });
+      }
+    } catch (error) {
+      // Jeśli token dziwny, np. pusty, nie-JWT
+      this.logout();
+      return of({ token: '', user: null });
+    }
+
+    return this.http.get<UserDetailsModel>(`${this.apiUrl}api/users/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).pipe(
+      tap(user => {
+        this.currentUserSubject.next(user);
+      }),
+      map(user => ({ token, user })),
+      catchError(err => {
+        this.logout();
+        return of({ token: '', user: null });
+      })
+    );
   }
+
 
   private decodeToken(token: string): UserDetailsModel {
     const decoded = this.jwtHelper.decodeToken(token);

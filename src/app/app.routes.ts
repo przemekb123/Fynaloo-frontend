@@ -7,6 +7,7 @@ import { CreateGroupPage } from './pages/group/create_group';
 import { GroupsPage } from './pages/group/group.page';
 import {GroupDetailsPage} from './pages/group/group-details.page';
 import {FriendsPage} from './pages/friend/friend.page';
+import {ProfilePage} from './pages/profile/profile.page';
 //import {AddFriendPage} from './pages/friend/add-friend.page';
 
 export const routes: Routes = [
@@ -20,6 +21,7 @@ export const routes: Routes = [
   { path: 'groups/create', component: CreateGroupPage, canActivate: [authGuard] },
   { path: 'groups/:groupId', component: GroupDetailsPage, canActivate: [authGuard] },
   {path: 'friends', component: FriendsPage, canActivate: [authGuard]},
+  {path: 'profile', component:ProfilePage, canActivate:[authGuard]},
   //{ path: 'add-friend', component: AddFriendPage, canActivate:[authGuard] },
 
   { path: '**', redirectTo: 'login' },

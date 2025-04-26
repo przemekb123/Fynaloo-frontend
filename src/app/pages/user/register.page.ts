@@ -116,7 +116,7 @@ export class RegisterPage implements OnInit {
     if (this.form.invalid) return;
 
     this.authService.register(this.form.value).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => this.router.navigate(['/login']),
       error: err => console.error('Błąd rejestracji', err)
     });
   }

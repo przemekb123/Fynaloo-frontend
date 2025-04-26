@@ -3,7 +3,7 @@ export const environment = {
   api: {
     server: 'http://localhost:8080/',
     healthUrl: 'http://localhost:8080/api/health',
-    nbpApi: "https://api.nbp.pl/api/exchangerates/rates/a/",
+    currencyApi: "https://api.frankfurter.app/latest",
     mapKey: '',
     googleAuthClientId: '',
     webSocketUrl: '',
