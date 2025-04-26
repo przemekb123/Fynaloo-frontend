@@ -131,7 +131,12 @@ export class DashboardPage implements OnInit {
 
   getAmountInPln(debt: any): number {
     const amount = debt.type === 'group' ? debt.yourDebt : debt.amount;
-    const rate = this.exchangeRates[debt.currency] || 1;
-    return amount * rate;
+    const rate = this.exchangeRates[debt.currency];
+
+    if (!rate) {
+      return amount;
+    }
+
+    return amount / rate;
   }
 }
