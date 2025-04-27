@@ -1,23 +1,22 @@
-// mobile-add-expense.component.ts
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import {ExpenseParticipantModel} from '../../../models/DTO/expense-participant.model';
-import {GroupService} from '../../../core/services/group.service';
-import {ExpenseService} from '../../../core/services/expense.service';
-import {AuthService} from '../../../core/services/auth.service';
-import {ExpanseRequest} from '../../../models/Requests/expense-request';
-import {CurrencyModel} from '../../../models/Enums/currency.model';
-
+import { FormsModule } from '@angular/forms'; // Dodane
+import { ExpenseParticipantModel } from '../../../models/DTO/expense-participant.model';
+import { GroupService } from '../../../core/services/group.service';
+import { ExpenseService } from '../../../core/services/expense.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { ExpanseRequest } from '../../../models/Requests/expense-request';
+import { CurrencyModel } from '../../../models/Enums/currency.model';
 
 @Component({
   standalone: true,
   selector: 'app-mobile-add-expense',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule], // Dodane FormsModule
   template: `
     <div class="fixed inset-0 bg-black bg-opacity-40 flex items-end z-50" (click)="closePopup()">
       <div class="bg-white w-full rounded-t-3xl p-6 pt-10 pb-6 flex flex-col gap-5 max-h-[90vh] overflow-y-auto relative" (click)="$event.stopPropagation()">
-        
+
         <button (click)="closePopup()" class="absolute top-4 right-4">
           <span class="material-icons text-gray-400 hover:text-gray-600 text-3xl">close</span>
         </button>
@@ -43,6 +42,18 @@ import {CurrencyModel} from '../../../models/Enums/currency.model';
           <label class="text-sm font-medium">Opis</label>
           <input type="text" formControlName="description" placeholder="Np. Pizza, bilety..." class="p-3 border rounded-lg" />
 
+          <label class="text-sm font-medium">Podział wydatku</label>
+          <div class="flex gap-4">
+            <label class="flex items-center gap-2">
+              <input type="radio" name="splitType" [checked]="equalSplit" (change)="setEqualSplit(true)" />
+              Równy podział
+            </label>
+            <label class="flex items-center gap-2">
+              <input type="radio" name="splitType" [checked]="!equalSplit" (change)="setEqualSplit(false)" />
+              Własne kwoty
+            </label>
+          </div>
+
           <label class="text-sm font-medium">Dodaj uczestnika</label>
           <select (change)="onParticipantSelect($event)" class="border p-3 rounded-lg">
             <option value="">Wybierz uczestnika</option>
@@ -63,7 +74,22 @@ import {CurrencyModel} from '../../../models/Enums/currency.model';
             </div>
           </div>
 
+          <div *ngIf="!equalSplit" class="flex flex-col gap-2 mt-4">
+            <div *ngFor="let participant of selectedParticipants">
+              <label class="text-sm font-medium">
+                {{ getUsernameById(participant.userId) }}:
+              </label>
+              <input
+                type="number"
+                [(ngModel)]="participant.shareAmount"
+                [ngModelOptions]="{standalone: true}"
+                class="p-2 border rounded-lg w-full"
+                placeholder="Wpisz kwotę"
+              />
+            </div>
+          </div>
 
+          <div *ngIf="errorMessage" class="text-red-500 text-sm mt-2">{{ errorMessage }}</div>
 
           <button type="submit" [disabled]="form.invalid || selectedParticipants.length === 0"
                   class="bg-pink-500 text-white font-bold py-3 rounded-xl hover:bg-pink-600 transition disabled:opacity-50">
@@ -72,7 +98,6 @@ import {CurrencyModel} from '../../../models/Enums/currency.model';
         </form>
       </div>
     </div>
-
   `
 })
 export class MobileAddExpenseComponent implements OnInit {
@@ -82,6 +107,8 @@ export class MobileAddExpenseComponent implements OnInit {
   groups: any[] = [];
   selectedGroupMembers: any[] = [];
   selectedParticipants: ExpenseParticipantModel[] = [];
+  equalSplit: boolean = true;
+  errorMessage: string = '';
 
   readonly currencyValues = Object.values(CurrencyModel)
 
@@ -103,6 +130,12 @@ export class MobileAddExpenseComponent implements OnInit {
     this.groupService.getGroupsForUser(this.authService.getCurrentUserId()).subscribe(groups => {
       this.groups = groups;
     });
+
+    this.form.get('amount')?.valueChanges.subscribe(() => {
+      if (this.equalSplit) {
+        this.recalculateShares();
+      }
+    });
   }
 
   onGroupChange(event: Event) {
@@ -115,14 +148,9 @@ export class MobileAddExpenseComponent implements OnInit {
     }
 
     const selectedGroup = this.groups.find(g => g.groupId === groupId);
-    if (selectedGroup) {
-      this.selectedGroupMembers = selectedGroup.members ?? [];
-    } else {
-      this.selectedGroupMembers = [];
-    }
+    this.selectedGroupMembers = selectedGroup?.members ?? [];
     this.selectedParticipants = [];
   }
-
 
   onParticipantSelect(event: Event) {
     const userId = Number((event.target as HTMLSelectElement).value);
@@ -133,6 +161,13 @@ export class MobileAddExpenseComponent implements OnInit {
       shareAmount: 0,
       settled: false
     });
+
+    this.recalculateShares();
+  }
+
+  removeParticipant(userId: number) {
+    this.selectedParticipants = this.selectedParticipants.filter(p => p.userId !== userId);
+    this.recalculateShares();
   }
 
   getUsernameById(userId: number): string {
@@ -140,25 +175,60 @@ export class MobileAddExpenseComponent implements OnInit {
     return user?.username || 'Użytkownik';
   }
 
-  removeParticipant(userId: number) {
-    this.selectedParticipants = this.selectedParticipants.filter(p => p.userId !== userId);
+  setEqualSplit(equal: boolean) {
+    this.equalSplit = equal;
+    this.recalculateShares();
   }
 
+  recalculateShares() {
+    if (this.equalSplit && this.selectedParticipants.length > 0) {
+      const amount = this.form.value.amount || 0;
+      const share = amount / this.selectedParticipants.length;
+      this.selectedParticipants = this.selectedParticipants.map(p => ({
+        ...p,
+        shareAmount: share
+      }));
+    }
+  }
+
+  remainingAmount(): number {
+    const totalShare = this.selectedParticipants.reduce((sum, p) => sum + (Number(p.shareAmount) || 0), 0);
+    const amount = Number(this.form.value.amount) || 0;
+    return amount - totalShare;
+  }
 
   submit() {
+    this.errorMessage = '';
+
+    if (!this.validateShares()) {
+      return;
+    }
+
     const request: ExpanseRequest = {
       groupId: this.form.value.groupId,
       paidBy: this.authService.getCurrentUsername(),
       amount: this.form.value.amount,
       currency: this.form.value.currency,
       description: this.form.value.description,
-      participants: this.selectedParticipants
+      participants: this.selectedParticipants // to jest poprawnie!
     };
 
     this.expenseService.createExpense(request).subscribe({
       next: () => this.closePopup(),
       error: err => console.error('Błąd dodawania wydatku', err)
     });
+  }
+
+  validateShares(): boolean {
+    const totalShare = this.selectedParticipants.reduce((sum, p) => sum + (Number(p.shareAmount) || 0), 0);
+    const amount = Number(this.form.value.amount);
+
+    // Pozwalamy na małą tolerancję, np. zaokrąglenie groszowe
+    if (Math.abs(totalShare - amount) > 0.01) {
+      this.errorMessage = `Suma udziałów (${totalShare.toFixed(2)}) nie równa się całkowitej kwocie wydatku (${amount.toFixed(2)}).`;
+      return false;
+    }
+    return true;
   }
 
   closePopup() {

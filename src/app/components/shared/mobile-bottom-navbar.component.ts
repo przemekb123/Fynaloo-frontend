@@ -65,9 +65,9 @@ import {AuthService} from '../../core/services/auth.service';
             <span class="text-lg font-semibold text-gray-700">Dodaj wydatek</span>
           </button>
 
-          <button (click)="navigateTo('/add-settlement')" class="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-100 transition">
-            <span class="material-icons text-2xl text-pink-500">sync_alt</span>
-            <span class="text-lg font-semibold text-gray-700">Dodaj wyrównanie</span>
+          <button (click)="toggleAddAdjustPopup()" disabled class="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-100 transition">
+            <span class="material-icons text-2xl text-gray-300">sync_alt</span>
+            <span class="text-lg font-semibold text-gray-300">Dodaj wyrównanie</span>
           </button>
 
           <button (click)="toggleGroupPopup()" class="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-100 transition">
@@ -111,6 +111,7 @@ export class MobileBottomNavbarComponent {
   showCreateGroupPopup = false;
   showAddExpensePopup = false;
   showManualDebtPopup = false;
+  showAdjustPopup = false;
 
 
   constructor(private router: Router,public authService : AuthService) {}
@@ -134,10 +135,6 @@ export class MobileBottomNavbarComponent {
     this.showMenu = false;
   }
 
-  navigateTo(path: string) {
-    this.router.navigate([path]);
-    this.closeMenu();
-  }
 
   toggleFriendPopup() {
     this.showAddFriendPopup = !this.showAddFriendPopup;
@@ -156,6 +153,11 @@ export class MobileBottomNavbarComponent {
 
   toggleAddManualDebtPopup() {
     this.showManualDebtPopup = !this.showManualDebtPopup;
+    this.closeMenu();
+  }
+
+  toggleAddAdjustPopup() {
+    this.showAdjustPopup = !this.showAdjustPopup;
     this.closeMenu();
   }
 }

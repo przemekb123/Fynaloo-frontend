@@ -15,7 +15,7 @@ export class CurrencyService {
 
   getExchangeRate(currency: string): Observable<number> {
     if (currency.toUpperCase() === 'PLN') {
-      return of(1); // PLN do PLN = 1
+      return of(1);
     }
 
     if (this.cache[currency]) {
@@ -23,7 +23,6 @@ export class CurrencyService {
     }
 
     if (this.ratesLoaded) {
-      // Jeśli już próbowaliśmy załadować, a nie ma waluty → zwróć 1
       return of(1);
     }
 
