@@ -52,7 +52,7 @@ import {MobileExpenseDetailsComponent} from '../../components/mobile/expense/mob
             <div class="flex justify-between items-start">
               <div>
                 <p class="text-[13px] font-bold text-[var(--color-mobile-add-button)]">
-                  Zapłacone przez: <span class="font-medium">{{ debt.type === 'group' ? debt.paidBy : debt.creditor }}</span>
+                  Zapłacone przez: <span class="font-medium">{{ debt.type === 'group' ? debt.firstName + ' ' + debt.lastName : debt.creditorFirstName + ' ' + debt.creditorLastName }}</span>
                 </p>
                 <p class="text-sm" [ngClass]="selectedOption === 'manual' ? 'text-gray-500' : 'text-gray-700'">
                   Opis: {{ debt.description }}

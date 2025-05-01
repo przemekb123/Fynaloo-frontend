@@ -6,7 +6,9 @@ export interface ExpenseDetailsModel {
   id: number;
   description: string;
   amount: number;
-  paidBy: string;                    // login/username osoby, która zapłaciła
+  paidBy: string;
+  firstName: string;
+  lastName: string;
   currency: CurrencyModel;
   participants: ParticipantInfoModel[]; // uczestnicy
   paidDebts: PaidDebtInfoModel[];        // spłacone długi

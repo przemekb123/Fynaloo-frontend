@@ -1,17 +1,17 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import {ManualDebtService} from '../../../core/services/manualDebt.service';
-import {AuthService} from '../../../core/services/auth.service';
-import {FriendService} from '../../../core/services/friend.service';
-import {ManualDebtRequest} from '../../../models/Requests/manual-debt-request';
-import {FriendModel} from '../../../models/DTO/friend.model';
-
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
+import { ManualDebtService } from '../../../core/services/manualDebt.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { FriendService } from '../../../core/services/friend.service';
+import { ManualDebtRequest } from '../../../models/Requests/manual-debt-request';
+import { FriendModel } from '../../../models/DTO/friend.model';
+import { CurrencyModel } from '../../../models/Enums/currency.model';
 
 @Component({
   standalone: true,
   selector: 'app-mobile-manual-debt',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   template: `
     <div class="fixed inset-0 bg-black bg-opacity-40 flex items-end z-50" (click)="closePopup()">
       <div class="bg-white w-full rounded-t-3xl p-6 pt-12 flex flex-col gap-4 relative" (click)="$event.stopPropagation()">
@@ -31,6 +31,12 @@ import {FriendModel} from '../../../models/DTO/friend.model';
           <label class="text-sm font-medium">Kwota</label>
           <input type="number" formControlName="amount" placeholder="Np. 50.00" class="p-3 border rounded-lg" />
 
+          <label class="text-sm font-medium">Waluta</label>
+          <select formControlName="currency" class="p-3 border rounded-lg">
+            <option value="">Wybierz walutę</option>
+            <option *ngFor="let cur of currencyValues" [value]="cur">{{ cur }}</option>
+          </select>
+
           <label class="text-sm font-medium">Opis</label>
           <input type="text" formControlName="description" placeholder="Np. zwrot za obiad" class="p-3 border rounded-lg" />
 
@@ -47,8 +53,8 @@ export class MobileManualDebtComponent implements OnInit {
   @Output() closed = new EventEmitter<void>();
 
   form: FormGroup;
-  users: any[] = [];
   friends: FriendModel[] = [];
+  readonly currencyValues = Object.values(CurrencyModel); // ← dodane!
 
   constructor(
     private fb: FormBuilder,
@@ -59,6 +65,7 @@ export class MobileManualDebtComponent implements OnInit {
     this.form = this.fb.group({
       debtor: ['', Validators.required],
       amount: [0, Validators.required],
+      currency: ['', Validators.required], // ← nowy walidator!
       description: ['', Validators.required],
     });
   }
@@ -77,6 +84,7 @@ export class MobileManualDebtComponent implements OnInit {
       debtor: this.form.value.debtor,
       creditor: this.authService.getCurrentUsername(),
       amount: this.form.value.amount,
+      currency: this.form.value.currency, // ← dodane!
       description: this.form.value.description,
     };
 

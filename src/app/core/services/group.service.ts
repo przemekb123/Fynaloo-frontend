@@ -17,21 +17,21 @@ export class GroupService {
    * Pobiera wszystkie grupy danego użytkownika.
    */
   getGroupsForUser(userId: number): Observable<GroupDetailsModel[]> {
-    return this.http.get<GroupDetailsModel[]>(`${this.apiUrl}/user/${userId}`, { withCredentials: true });
+    return this.http.get<GroupDetailsModel[]>(`${this.apiUrl}/user/${userId}`, { });
   }
 
   /**
    * Tworzy nową grupę.
    */
   createGroup(request: CreateGroupRequest): Observable<GroupDetailsModel> {
-    return this.http.post<GroupDetailsModel>(`${this.apiUrl}`, request, { withCredentials: true });
+    return this.http.post<GroupDetailsModel>(`${this.apiUrl}`, request, {  });
   }
 
   /**
    * Pobiera szczegóły konkretnej grupy.
    */
   getGroupDetails(groupId: number): Observable<GroupDetailsModel> {
-    return this.http.get<GroupDetailsModel>(`${this.apiUrl}/${groupId}`, { withCredentials: true });
+    return this.http.get<GroupDetailsModel>(`${this.apiUrl}/${groupId}`, { });
   }
 
   /**
@@ -40,7 +40,7 @@ export class GroupService {
   removeMemberFromGroup(groupId: number, userId: number): Observable<string> {
     return this.http.delete<string>(`${this.apiUrl}/${groupId}/remove-member/${userId}`, {
       responseType: 'text' as 'json',
-      withCredentials: true
+
     });
   }
 
@@ -77,5 +77,11 @@ export class GroupService {
    */
   rejectInvitation(invitationId: number): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/invitations/${invitationId}/reject`, {});
+  }
+  /**
+   * Dolaczanie do grupy przez link.
+   */
+  joinGroupViaLink(groupUrl: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/join/${groupUrl}`, {}, { withCredentials: true });
   }
 }

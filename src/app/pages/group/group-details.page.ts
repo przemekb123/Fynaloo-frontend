@@ -7,6 +7,9 @@ import {AuthService} from '../../core/services/auth.service';
 import {GroupDetailsModel} from '../../models/DTO/group-details.model';
 import {MobileBottomNavbarComponent} from '../../components/shared/mobile-bottom-navbar.component';
 import {MobileHeaderComponent} from '../../components/shared/mobile-header.component';
+import { BalanceService } from '../../core/services/balance.service';
+import { BalanceSummaryDTO } from '../../models/DTO/balance-summary.model';
+
 
 @Component({
   standalone: true,
@@ -61,7 +64,7 @@ import {MobileHeaderComponent} from '../../components/shared/mobile-header.compo
     <span class="material-symbols-outlined text-white text-base"
           style="font-variation-settings: 'wght' 300, 'opsz' 24;">
       person_add
-    </span>
+        </span>
           Zaproś członka
         </button>
 
@@ -78,7 +81,30 @@ import {MobileHeaderComponent} from '../../components/shared/mobile-header.compo
         </button>
 
       </div>
+      <div *ngIf="showLinkPopup" class="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center" (click)="closeLinkPopup()">
+        <div class="bg-white rounded-xl shadow-lg w-[90%] max-w-sm p-6 relative" (click)="$event.stopPropagation()">
 
+          <!-- Przycisk zamknięcia -->
+          <button (click)="closeLinkPopup()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
+            <span class="material-icons">close</span>
+          </button>
+
+          <h3 class="text-center text-lg font-semibold text-gray-800 mb-4">Link zaproszenia</h3>
+
+          <div class="bg-gray-100 rounded-lg p-3 text-sm break-words text-gray-700 text-center mb-4">
+            <a [href]="inviteLink" target="_blank" class="text-indigo-600 underline">{{ inviteLink }}</a>
+          </div>
+
+          <button (click)="copyLink()" class="w-full py-2 text-sm font-semibold text-white rounded-lg bg-[var(--color-mobile-add-button)] hover:bg-indigo-600">
+            Skopiuj link
+          </button>
+
+          <div *ngIf="copiedToClipboard" class="text-green-600 text-sm mt-2 text-center font-semibold">
+            Skopiowano do schowka!
+          </div>
+
+        </div>
+      </div>
 
       <!-- Popup zaproszenia -->
       <div *ngIf="showInvitePopup" class="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
@@ -149,19 +175,30 @@ export class GroupDetailsPage implements OnInit {
 
   showInvitePopup = false;
   inviteUsername = '';
+  inviteLink: string = '';
+  showLinkPopup = false;
+  copiedToClipboard = false;
+
+  balances: Map<number, number> = new Map();
+
+
 
   constructor(
     private groupService: GroupService,
     private authService: AuthService,
     private fb: FormBuilder,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private balanceService: BalanceService
   ) {
   }
 
   ngOnInit(): void {
     this.groupId = Number(this.route.snapshot.paramMap.get('groupId'));
     this.loadGroup();
+    this.balanceService.getMyBalances().subscribe(balances => {
+      balances.forEach(b => this.balances.set(b.userId, b.amountPln));
+    });
   }
 
   loadGroup() {
@@ -265,6 +302,33 @@ export class GroupDetailsPage implements OnInit {
 
 
   generateInviteLink() {
+    if (!this.group) {
+      return;
+    }
 
+    const baseUrl = window.location.origin;
+    this.inviteLink = `${baseUrl}/join/${this.group.groupUrl}`;
+    this.showLinkPopup = true;
+  }
+
+  copyLink() {
+    if (!this.inviteLink) return;
+
+    navigator.clipboard.writeText(this.inviteLink).then(() => {
+      this.copiedToClipboard = true;
+      setTimeout(() => {
+        this.copiedToClipboard = false;
+      }, 2000);
+    });
+  }
+
+  closeLinkPopup() {
+    this.showLinkPopup = false;
+    this.inviteLink = '';
+    this.copiedToClipboard = false;
+  }
+
+  getBalanceForUser(userId: number): number | null {
+    return this.balances.has(userId) ? this.balances.get(userId)! : null;
   }
 }
